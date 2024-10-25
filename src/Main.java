@@ -13,7 +13,6 @@ public class Main extends JFrame {
         ResponcePanel responcePanelN = new ResponcePanel();
 
         this.add(panel, BorderLayout.CENTER);
-        this.add(responcePanelN, BorderLayout.SOUTH);
 
         panel.addMoveListener(
                 responcePanelN

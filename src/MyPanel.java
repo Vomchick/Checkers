@@ -11,6 +11,16 @@ public class MyPanel extends JPanel{
     private CellState _cellState;
     private ArrayList<MoveListener> listeners = new ArrayList<>();
 
+    int[][] initialCellsPosition = {
+            {1,0,1,0,1,0,1,0},
+            {0,1,0,1,0,1,0,1},
+            {1,0,1,0,1,0,1,0},
+            {0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0},
+            {0,2,0,2,0,2,0,2},
+            {2,0,2,0,2,0,2,0},
+            {0,2,0,2,0,2,0,2}};
+
     public void addMoveListener(MoveListener listener) {
         listeners.add(listener);
     }
@@ -70,8 +80,6 @@ public class MyPanel extends JPanel{
                 }
             }
         });
-
-        this._cellState = CellState.WithBlack;
     }
 
     @Override
@@ -81,25 +89,29 @@ public class MyPanel extends JPanel{
         for(int i=0, x=0; i<8; i++, x+=100){
             for(int j=0, y=0; j<8; j++, y+=100){
                 if((i+j)%2==0) {
-                    g.setColor(new Color(38, 21, 6));
-                    g.fillRect(x, y, 100, 100);
-
-
+                    g.setColor(new Color(140, 109, 27));
                 } else {
                     g.setColor(new Color(245, 232, 196));
                 }
                 g.fillRect(x, y, 100, 100);
+            }
+        }
 
-                if (_cellState == CellState.WithBlack) {
+        repaintCells(g, initialCellsPosition);
+    }
+
+    private void repaintCells(Graphics g, int[][] positions){
+        for(int i=0, x=0; i<8; i++, x+=100){
+            for(int j=0, y=0; j<8; j++, y+=100){
+                if(positions[j][i] == 1){
                     g.setColor(Color.black);
                     g.fillOval(x+10, y+10, 80, 80);
                 }
-                else if(_cellState == CellState.WithWhite) {
+                else if(positions[j][i] == 2){
                     g.setColor(Color.white);
                     g.fillOval(x+10, y+10, 80, 80);
                 }
             }
-            System.out.println();
         }
     }
 }
