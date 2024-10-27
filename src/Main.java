@@ -7,19 +7,18 @@ public class Main extends JFrame {
         SwingUtilities.invokeLater(Main::new);
     }
 
+    public static final int HEIGHT = 600;
+    public static final int WIDTH = 600;
+
     public Main() throws HeadlessException {
-
-        MyPanel panel = new MyPanel();
-        ResponcePanel responcePanelN = new ResponcePanel();
-
-        this.add(panel, BorderLayout.CENTER);
-
-        panel.addMoveListener(
-                responcePanelN
-        );
-
+        this.setTitle("Checkers");
+        this.setSize(WIDTH, HEIGHT);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setSize( 800, 800);
+        this.setLocationByPlatform(true);
+
+        var board = new GameBoard();
+        this.add(board, BorderLayout.CENTER);
+
         this.setVisible(true);
     }
 }
