@@ -3,6 +3,10 @@ import java.awt.*;
 
 public class Main extends JFrame {
 
+    static {
+        System.load("C:/Study/Checkers/CheckersLib/cmake-build-debug/libCheckersLib.dll");
+    }
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(Main::new);
     }

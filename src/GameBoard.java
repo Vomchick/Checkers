@@ -8,36 +8,47 @@ import java.awt.event.MouseEvent;
 public class GameBoard extends JPanel{
 
     private static final int PADDING = 16;
-
     private Point selected;
-    private boolean selectedGood = true;
+    private boolean selectedGood = false;
     private static int BOARD_SIZE = 100;
     private static int CELL_SIZE;
+    private boolean playerOneTurn = true;
 
-    private Color lightCell = new Color(245, 232, 196);
-    private Color darkCell = new Color(110, 72, 25);
+    private final Color lightCell = new Color(245, 232, 196);
+    private final Color darkCell = new Color(110, 72, 25);
 
-    int[][] initialCellsPosition = {
-            {0,1,0,1,0,1,0,1},
-            {1,0,1,0,1,0,1,0},
-            {0,1,0,1,0,1,0,1},
-            {0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0},
-            {2,0,2,0,2,0,2,0},
-            {0,2,0,2,0,2,0,2},
-            {2,0,2,0,2,0,2,0}};
-
+    private final GameLogic gameLogic = new GameLogic();
 
     public GameBoard() {
+
         this.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+
                 var wight = getSize().width;
                 var height = getSize().height;
                 BOARD_SIZE = Math.min(wight, height);
                 CELL_SIZE = BOARD_SIZE / 8;
-                selected = new Point((e.getX() - calculateOffset(wight)) / CELL_SIZE,
-                        (e.getY() - calculateOffset(height)) / CELL_SIZE);
+                var xIndex = (e.getX() - calculateOffset(wight)) / CELL_SIZE;
+                var yIndex = (e.getY() - calculateOffset(height)) / CELL_SIZE;
+
+                var tempSel = new Point(xIndex, yIndex);
+
+                if(isDarkCellSelected(tempSel) && isDarkCellSelected(selected)) {
+                    if (gameLogic.isMoveAvailable(selected.X(), selected.Y(), tempSel.X(), tempSel.Y(), playerOneTurn)) {
+                        gameLogic.makeMove(selected.X(), selected.Y(), tempSel.X(), tempSel.Y());
+                        var found = gameLogic.checkForKill(selected.X(), selected.Y(), playerOneTurn);
+
+                        playerOneTurn = !playerOneTurn;
+                    }
+                    selected = tempSel;
+                }
+                else {
+                    selected = tempSel;
+                }
+
+                selectedGood = gameLogic.isSelectedGood(xIndex, yIndex, playerOneTurn);
+
                 repaint();
             }
         });
@@ -47,14 +58,14 @@ public class GameBoard extends JPanel{
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        for(int i=0, x=0; i<8; i++, x+=100){
-            for(int j=0, y=0; j<8; j++, y+=100){
+        for(int i=0, X=0; i<8; i++, X+=100){
+            for(int j=0, Y=0; j<8; j++, Y+=100){
                 if((i+j)%2==0) {
                     g.setColor(new Color(110, 72, 25));
                 } else {
                     g.setColor(new Color(245, 232, 196));
                 }
-                g.fillRect(x, y, 100, 100);
+                g.fillRect(X, Y, 100, 100);
             }
         }
 
@@ -62,15 +73,15 @@ public class GameBoard extends JPanel{
     }
 
     private void repaintCells(Graphics g, int[][] positions){
-        for(int i=0, x=0; i<8; i++, x+=100){
-            for(int j=0, y=0; j<8; j++, y+=100){
+        for(int i=0, X=0; i<8; i++, X+=100){
+            for(int j=0, Y=0; j<8; j++, Y+=100){
                 if(positions[j][i] == 1){
                     g.setColor(Color.black);
-                    g.fillOval(x+10, y+10, 80, 80);
+                    g.fillOval(X+10, Y+10, 80, 80);
                 }
                 else if(positions[j][i] == 2){
                     g.setColor(Color.white);
-                    g.fillOval(x+10, y+10, 80, 80);
+                    g.fillOval(X+10, Y+10, 80, 80);
                 }
             }
         }
@@ -103,25 +114,25 @@ public class GameBoard extends JPanel{
             }
         }
 
-        if (isDarkCellSelected()) {
+        if (isDarkCellSelected(selected)) {
             g.setColor(selectedGood? Color.GREEN : Color.RED);
-            g.fillRect(OFFSET_X + selected.x() * CELL_SIZE, OFFSET_Y + selected.y() * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            g.fillRect(OFFSET_X + selected.X() * CELL_SIZE, OFFSET_Y + selected.Y() * CELL_SIZE, CELL_SIZE, CELL_SIZE);
         }
 
-        var state = initialCellsPosition;
+        var state = gameLogic.getBoard();
         for (int y = 0; y < 8; y ++) {
             int cy = OFFSET_Y + y * CELL_SIZE + CELL_PADDING;
             for (int x = (y + 1) % 2; x < 8; x += 2) {
 
                 // Empty, just skip
-                if (state[y][x] == 0) {
+                if (state[toIndex(x, y)] == 0) {
                     continue;
                 }
 
                 int cx = OFFSET_X + x * CELL_SIZE + CELL_PADDING;
 
                 // Black checker
-                if (state[y][x] == 1) {
+                if (state[toIndex(x, y)] == 2) {
                     g.setColor(Color.BLACK);
                     g.fillOval(cx, cy, CHECKER_SIZE, CHECKER_SIZE);
                     g.setColor(Color.LIGHT_GRAY);
@@ -129,7 +140,7 @@ public class GameBoard extends JPanel{
                 }
 
                 // Black king
-                /*else if (state[y][x] == 3) {
+                /*else if (state[Y][X] == 3) {
                     g.setColor(Color.DARK_GRAY);
                     g.fillOval(cx + 1, cy + 2, CHECKER_SIZE, CHECKER_SIZE);
                     g.setColor(Color.LIGHT_GRAY);
@@ -143,7 +154,7 @@ public class GameBoard extends JPanel{
                 }*/
 
                 // White checker
-                else if (state[y][x] == 2) {
+                else if (state[toIndex(x, y)] == 1) {
                     g.setColor(Color.WHITE);
                     g.fillOval(cx, cy, CHECKER_SIZE, CHECKER_SIZE);
                     g.setColor(Color.DARK_GRAY);
@@ -151,7 +162,7 @@ public class GameBoard extends JPanel{
                 }
 
                 // White king
-                /*else if (state[y][x] == 4) {
+                /*else if (state[Y][X] == 4) {
                     g.setColor(Color.LIGHT_GRAY);
                     g.fillOval(cx + 1, cy + 2, CHECKER_SIZE, CHECKER_SIZE);
                     g.setColor(Color.DARK_GRAY);
@@ -179,10 +190,10 @@ public class GameBoard extends JPanel{
         g.drawOval(cx + CHECKER_SIZE / 4, cy + CHECKER_SIZE / 4, CHECKER_SIZE - CHECKER_SIZE / 2, CHECKER_SIZE - CHECKER_SIZE / 2);
     }
 
-    private boolean isDarkCellSelected(){
-        if(selected != null){
-            if(selected.x() < 8 && selected.y() < 8) {
-                return (selected.x() + selected.y()) % 2 == 1;
+    private boolean isDarkCellSelected(Point cell){
+        if(cell != null){
+            if(cell.X() < 8 && cell.Y() < 8) {
+                return (cell.X() + cell.Y()) % 2 == 1;
             }
         }
 
@@ -191,5 +202,9 @@ public class GameBoard extends JPanel{
 
     private int calculateOffset(int axe){
         return (axe - CELL_SIZE * 8) / 2;
+    }
+
+    private int toIndex(int x, int y){
+        return y * 4 + x / 2;
     }
 }
