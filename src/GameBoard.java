@@ -36,16 +36,20 @@ public class GameBoard extends JPanel{
 
                 if(isDarkCellSelected(tempSel) && isDarkCellSelected(selected)) {
                     if (gameLogic.isMoveAvailable(selected.X(), selected.Y(), tempSel.X(), tempSel.Y(), playerOneTurn)) {
-                        gameLogic.makeMove(selected.X(), selected.Y(), tempSel.X(), tempSel.Y());
-                        var found = gameLogic.checkForKill(selected.X(), selected.Y(), playerOneTurn);
+                        var kill = gameLogic.makeMove(selected.X(), selected.Y(), tempSel.X(), tempSel.Y());
 
-                        playerOneTurn = !playerOneTurn;
+                        if(!kill || !gameLogic.checkForKill(tempSel.X(), tempSel.Y(), playerOneTurn)) {
+                            playerOneTurn = !playerOneTurn;
+                        }
+
+                        var killBoard = gameLogic.getKillBoard();
+                        for(var element : killBoard) {
+                            System.out.print(element);
+                        }
+                        System.out.println();
                     }
-                    selected = tempSel;
                 }
-                else {
-                    selected = tempSel;
-                }
+                selected = tempSel;
 
                 selectedGood = gameLogic.isSelectedGood(xIndex, yIndex, playerOneTurn);
 
@@ -124,63 +128,39 @@ public class GameBoard extends JPanel{
             int cy = OFFSET_Y + y * CELL_SIZE + CELL_PADDING;
             for (int x = (y + 1) % 2; x < 8; x += 2) {
 
-                // Empty, just skip
                 if (state[toIndex(x, y)] == 0) {
                     continue;
                 }
 
                 int cx = OFFSET_X + x * CELL_SIZE + CELL_PADDING;
 
-                // Black checker
-                if (state[toIndex(x, y)] == 2) {
-                    g.setColor(Color.BLACK);
-                    g.fillOval(cx, cy, CHECKER_SIZE, CHECKER_SIZE);
-                    g.setColor(Color.LIGHT_GRAY);
-                    drawCheckerOvals(g, CHECKER_SIZE, cy, cx);
-                }
-
-                // Black king
-                /*else if (state[Y][X] == 3) {
-                    g.setColor(Color.DARK_GRAY);
-                    g.fillOval(cx + 1, cy + 2, CHECKER_SIZE, CHECKER_SIZE);
-                    g.setColor(Color.LIGHT_GRAY);
-                    g.drawOval(cx + 1, cy + 2, CHECKER_SIZE, CHECKER_SIZE);
-                    g.setColor(Color.DARK_GRAY);
-                    g.fillOval(cx, cy, CHECKER_SIZE, CHECKER_SIZE);
-                    g.setColor(Color.LIGHT_GRAY);
-                    g.drawOval(cx, cy, CHECKER_SIZE, CHECKER_SIZE);
-                    g.setColor(Color.BLACK);
-                    g.fillOval(cx - 1, cy - 2, CHECKER_SIZE, CHECKER_SIZE);
-                }*/
-
-                // White checker
-                else if (state[toIndex(x, y)] == 1) {
+                if (state[toIndex(x, y)] == 1) {
                     g.setColor(Color.WHITE);
                     g.fillOval(cx, cy, CHECKER_SIZE, CHECKER_SIZE);
                     g.setColor(Color.DARK_GRAY);
                     drawCheckerOvals(g, CHECKER_SIZE, cy, cx);
                 }
 
-                // White king
-                /*else if (state[Y][X] == 4) {
-                    g.setColor(Color.LIGHT_GRAY);
-                    g.fillOval(cx + 1, cy + 2, CHECKER_SIZE, CHECKER_SIZE);
-                    g.setColor(Color.DARK_GRAY);
-                    g.drawOval(cx + 1, cy + 2, CHECKER_SIZE, CHECKER_SIZE);
-                    g.setColor(Color.LIGHT_GRAY);
-                    g.fillOval(cx, cy, CHECKER_SIZE, CHECKER_SIZE);
-                    g.setColor(Color.DARK_GRAY);
-                    g.drawOval(cx, cy, CHECKER_SIZE, CHECKER_SIZE);
+                else if (state[toIndex(x, y)] == 3) {
                     g.setColor(Color.WHITE);
-                    g.fillOval(cx - 1, cy - 2, CHECKER_SIZE, CHECKER_SIZE);
+                    g.fillOval(cx, cy, CHECKER_SIZE, CHECKER_SIZE);
+                    g.setColor(Color.YELLOW);
+                    drawCheckerOvals(g, CHECKER_SIZE, cy, cx);
                 }
 
-                // Any king (add some extra highlights)
-                if (Board.isKingChecker(id)) {
-                    g.setColor(new Color(255, 240, 0));
-                    g.drawOval(cx - 1, cy - 2, CHECKER_SIZE, CHECKER_SIZE);
-                    g.drawOval(cx + 1, cy, CHECKER_SIZE - 4, CHECKER_SIZE - 4);
-                }*/
+                else if (state[toIndex(x, y)] == 2) {
+                    g.setColor(Color.BLACK);
+                    g.fillOval(cx, cy, CHECKER_SIZE, CHECKER_SIZE);
+                    g.setColor(Color.LIGHT_GRAY);
+                    drawCheckerOvals(g, CHECKER_SIZE, cy, cx);
+                }
+
+                else if (state[toIndex(x, y)] == 4) {
+                    g.setColor(Color.BLACK);
+                    g.fillOval(cx, cy, CHECKER_SIZE, CHECKER_SIZE);
+                    g.setColor(Color.YELLOW);
+                    drawCheckerOvals(g, CHECKER_SIZE, cy, cx);
+                }
             }
         }
     }
