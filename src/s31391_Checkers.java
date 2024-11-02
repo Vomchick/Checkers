@@ -1,20 +1,20 @@
 import javax.swing.*;
 import java.awt.*;
 
-public class Main extends JFrame {
+public class s31391_Checkers extends JFrame {
 
     static {
-        System.load("C:/Study/Checkers/CheckersLib/cmake-build-debug/libCheckersLib.dll");
+        System.load("C:/Study/Checkers/Checkers/src/libCheckersLib.dll");
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(Main::new);
+        SwingUtilities.invokeLater(s31391_Checkers::new);
     }
 
     public static final int HEIGHT = 600;
     public static final int WIDTH = 600;
 
-    public Main() throws HeadlessException {
+    public s31391_Checkers() throws HeadlessException {
         this.setTitle("Checkers");
         this.setSize(WIDTH, HEIGHT);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
